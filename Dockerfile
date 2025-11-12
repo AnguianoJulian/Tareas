@@ -1,10 +1,7 @@
-# 1. Imagen base PHP con Apache
-FROM php:8.2-apache
+# Imagen base PHP con FPM y extensiones necesarias
+FROM php:8.2-fpm
 
-# 2. Variables de entorno para no preguntar al instalar paquetes
-ENV DEBIAN_FRONTEND=noninteractive
-
-# 3. Instalar dependencias de sistema y PostgreSQL
+# Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
@@ -13,31 +10,31 @@ RUN apt-get update && apt-get install -y \
     zip \
     curl \
     npm \
-    && docker-php-ext-install pdo pdo_pgsql zip \
-    && apt-get clean
+    && docker-php-ext-install pdo pdo_pgsql pgsql zip
 
-# 4. Habilitar mod_rewrite para Laravel
-RUN a2enmod rewrite
+# Instalar Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# 5. Instalar Composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-
-# 6. Copiar la app al contenedor
+# Establecer directorio de trabajo
 WORKDIR /var/www/html
+
+# Copiar archivos de la aplicación
 COPY . .
 
-# 7. Instalar dependencias PHP y optimizar autoload
-RUN composer install --no-dev --optimize-autoloader
+# Instalar dependencias de PHP y Node, compilar assets
+RUN composer install --no-dev --optimize-autoloader \
+    && npm install \
+    && npm run build
 
-# 8. Instalar dependencias Node y compilar assets
-RUN npm install
-RUN npm run build
+# Configurar permisos para storage y cache
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
+    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# 9. Establecer permisos correctos
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# Cachear configuración y rutas
+RUN php artisan config:cache && php artisan route:cache
 
-# 10. Exponer puerto 80 para Render
-EXPOSE 80
+# Exponer puerto (Render lo asigna)
+EXPOSE 10000
 
-# 11. Comando para correr Laravel en Apache
-CMD ["apache2-foreground"]
+# Iniciar el servidor PHP apuntando a 'public'
+CMD ["php", "-S", "0.0.0.0:10000", "-t", "public"]

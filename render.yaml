@@ -1,23 +1,31 @@
-# render.yaml - Configuración para Render
+# render.yaml - Configuración completa de Render para Laravel con Docker
 
 services:
   - type: web
-    name: Tareas
-    env: docker
-    branch: main
-    region: oregon
-    plan: free
-    autoDeploy: true
-    dockerfilePath: ./Dockerfile
+    name: tareas-app          # Nombre del servicio en Render
+    env: docker               # Usamos Dockerfile
+    branch: main              # Rama de Git que se desplegará
+    plan: free                # Plan gratuito
+    autoDeploy: true          # Deploy automático al hacer push
+    dockerfilePath: Dockerfile
+    port: 10000               # Puerto definido en Dockerfile
+
+    # Variables de entorno de Laravel (equivalente a .env)
     envVars:
+      - key: APP_NAME
+        value: TareasApp
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
         value: "false"
-      - key: APP_KEY
-        value: base64:lQl5xuB3n+Pzp7BZYrF1k5YQ8q96mdrX1MBPG+mnHEg=
       - key: APP_URL
-        value: https://tareas.onrender.com
+        value: https://tareas-app.onrender.com
+
+      - key: LOG_CHANNEL
+        value: stack
+      - key: LOG_LEVEL
+        value: debug
+
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_HOST
@@ -30,15 +38,17 @@ services:
         value: u6epudwkd89b0axbmtoa
       - key: DB_PASSWORD
         value: mkeg3lBjxnSWXIhErX717BCW07RvZH
+
       - key: SESSION_DRIVER
         value: database
-      - key: CACHE_DRIVER
+      - key: SESSION_LIFETIME
+        value: "120"
+      - key: CACHE_STORE
         value: database
-    healthCheckPath: /
-    startCommand: |
-      php artisan migrate --force
-      php artisan serve --host 0.0.0.0 --port 10000
-    buildCommand: |
-      composer install --no-dev --optimize-autoloader
-      npm install
-      npm run build
+      - key: QUEUE_CONNECTION
+        value: database
+
+      - key: FILESYSTEM_DISK
+        value: local
+      - key: VITE_APP_NAME
+        value: TareasApp
