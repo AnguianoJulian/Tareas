@@ -1,39 +1,39 @@
-# Usamos PHP 8.2 con FPM
+# 1. Usamos PHP 8.2 con FPM
 FROM php:8.2-fpm
 
-# Instalar dependencias del sistema y extensiones de PHP necesarias
+# 2. Instalar extensiones necesarias para Laravel y PostgreSQL
 RUN apt-get update && apt-get install -y \
-    libpq-dev \
     git \
     unzip \
+    libpq-dev \
+    libzip-dev \
+    zip \
     curl \
     npm \
-    nodejs \
-    build-essential \
-    && docker-php-ext-install pdo pdo_pgsql
+    && docker-php-ext-install pdo pdo_pgsql pgsql bcmath zip
 
-# Instalar Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# 3. Instalar Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Establecer el directorio de trabajo
+# 4. Crear directorio de la app
 WORKDIR /var/www/html
 
-# Copiar todo el proyecto
-COPY . .
+# 5. Copiar archivos de composer y package.json para instalar dependencias
+COPY composer.json composer.lock ./
+COPY package.json package-lock.json ./
 
-# Instalar dependencias de PHP y Node
+# 6. Instalar dependencias de PHP
 RUN composer install --no-dev --optimize-autoloader
+
+# 7. Instalar dependencias de Node y compilar assets
 RUN npm install
 RUN npm run build
 
-# Copiar .env de producción si no está en el repo
-# COPY .env.production .env
+# 8. Copiar el resto del proyecto
+COPY . .
 
-# Generar la key de Laravel si no existe
-RUN php artisan key:generate
+# 9. Exponer el puerto de Laravel
+EXPOSE 8000
 
-# Exponer el puerto que usará Laravel
-EXPOSE 10000
-
-# Comando para iniciar la app
-CMD php artisan serve --host 0.0.0.0 --port 10000
+# 10. Comando para iniciar Laravel (apunta al host 0.0.0.0 para Docker/Render)
+CMD php artisan serve --host=0.0.0.0 --port=8000
