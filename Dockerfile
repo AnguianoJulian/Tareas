@@ -1,40 +1,43 @@
-# 1. Imagen base oficial de PHP con extensiones necesarias
-FROM php:8.2-fpm
+# 1. Imagen base PHP con Apache
+FROM php:8.2-apache
 
-# 2. Instalar dependencias del sistema
+# 2. Variables de entorno para no preguntar al instalar paquetes
+ENV DEBIAN_FRONTEND=noninteractive
+
+# 3. Instalar dependencias de sistema y PostgreSQL
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
     libpq-dev \
     libzip-dev \
+    zip \
     curl \
     npm \
-    nodejs \
-    zip \
     && docker-php-ext-install pdo pdo_pgsql zip \
     && apt-get clean
 
-# 3. Instalar Composer
+# 4. Habilitar mod_rewrite para Laravel
+RUN a2enmod rewrite
+
+# 5. Instalar Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# 4. Establecer directorio de trabajo
+# 6. Copiar la app al contenedor
 WORKDIR /var/www/html
-
-# 5. Copiar proyecto al contenedor
 COPY . .
 
-# 6. Dar permisos a storage y cache
-RUN chown -R www-data:www-data storage bootstrap/cache
-
-# 7. Instalar dependencias de PHP
+# 7. Instalar dependencias PHP y optimizar autoload
 RUN composer install --no-dev --optimize-autoloader
 
-# 8. Instalar dependencias de Node y compilar assets
+# 8. Instalar dependencias Node y compilar assets
 RUN npm install
 RUN npm run build
 
-# 9. Exponer puerto de la app
-EXPOSE 8000
+# 9. Establecer permisos correctos
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# 10. Comando para iniciar Laravel
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+# 10. Exponer puerto 80 para Render
+EXPOSE 80
+
+# 11. Comando para correr Laravel en Apache
+CMD ["apache2-foreground"]
