@@ -1,44 +1,44 @@
+# render.yaml - Configuración para Render
+
 services:
   - type: web
-    name: miapp-laravel
-    env: php
-    plan: free
+    name: Tareas
+    env: docker
+    branch: main
     region: oregon
-
-    buildCommand: |
-      composer install --no-dev --optimize-autoloader
-      php artisan config:cache
-      php artisan route:cache
-      php artisan view:cache
-      npm install
-      npm run build
-
-    startCommand: |
-      php artisan migrate --force
-      php artisan serve --host 0.0.0.0 --port $PORT
-
+    plan: free
+    autoDeploy: true
+    dockerfilePath: ./Dockerfile
     envVars:
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
-        value: false
+        value: "false"
       - key: APP_KEY
-        generateValue: true
-
-      # Configuración de conexión a la base de datos en Clever Cloud
+        value: base64:lQl5xuB3n+Pzp7BZYrF1k5YQ8q96mdrX1MBPG+mnHEg=
+      - key: APP_URL
+        value: https://tareas.onrender.com
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_HOST
         value: bcpv4sjzvhlcd5zqd0iu-postgresql.services.clever-cloud.com
       - key: DB_PORT
-        value: 50013
+        value: "50013"
       - key: DB_DATABASE
         value: bcpv4sjzvhlcd5zqd0iu
       - key: DB_USERNAME
         value: u6epudwkd89b0axbmtoa
       - key: DB_PASSWORD
         value: mkeg3lBjxnSWXIhErX717BCW07RvZH
-
-      # Laravel configuration
-      - key: APP_URL
-        value: https://miapp-laravel.onrender.com
+      - key: SESSION_DRIVER
+        value: database
+      - key: CACHE_DRIVER
+        value: database
+    healthCheckPath: /
+    startCommand: |
+      php artisan migrate --force
+      php artisan serve --host 0.0.0.0 --port 10000
+    buildCommand: |
+      composer install --no-dev --optimize-autoloader
+      npm install
+      npm run build
