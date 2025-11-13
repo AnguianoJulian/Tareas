@@ -1,28 +1,23 @@
 services:
   - type: web
-    name: tareas-1
+    name: tareas-laravel
     env: docker
     plan: free
-    region: oregon
-    branch: main
-    dockerfilePath: ./Dockerfile
     autoDeploy: true
-
+    dockerfilePath: ./Dockerfile
     envVars:
+      - key: APP_KEY
+        value: base64:uEj0ZfFoBnvCJxcYpZHzvprYNeHnV2mCyHPH/18D54w=
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
         value: false
-      - key: APP_URL
-        value: https://tareas-1-5g03.onrender.com
-
-      # 🔹 Configuración base de datos PostgreSQL (Clever Cloud)
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_HOST
         value: bcpv4sjzvhlcd5zqd0iu-postgresql.services.clever-cloud.com
       - key: DB_PORT
-        value: 50013
+        value: "50013"
       - key: DB_DATABASE
         value: bcpv4sjzvhlcd5zqd0iu
       - key: DB_USERNAME
