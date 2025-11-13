@@ -19,33 +19,22 @@ RUN apt-get update && apt-get install -y \
 # 3. Instalar Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# 4. Establecer directorio de trabajo
+# 4. Directorio de trabajo
 WORKDIR /var/www/html
 
 # 5. Copiar archivos de la aplicación
 COPY . .
 
-# 6. Instalar dependencias de PHP y optimizar autoload
+# 6. Instalar dependencias de PHP y Node
 RUN composer install --no-dev --optimize-autoloader
-
-# 7. Instalar dependencias de Node y compilar assets
 RUN npm install && npm run build
 
-# 8. Configurar permisos para storage y bootstrap/cache
+# 7. Configurar permisos
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# 9. Generar key de Laravel solo si no está definida
-# (En producción normalmente ya tienes APP_KEY definida)
-# RUN php artisan key:generate
-
-# 10. Cachear configuración, rutas y vistas
-RUN php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache
-
-# 11. Exponer puerto que coincide con render.yaml
+# 8. Exponer puerto
 EXPOSE 10000
 
-# 12. Comando para correr Laravel con PHP built-in server
-CMD ["php", "-S", "0.0.0.0:10000", "-t", "public"]
+# 9. Iniciar servidor Laravel
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=10000"]

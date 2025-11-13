@@ -1,16 +1,13 @@
-# render.yaml - Configuración completa de Render para Laravel con Docker
 services:
   - type: web
-    name: tareas-app            # Nombre del servicio en Render
-    env: docker                 # Usamos Dockerfile
-    branch: main                # Rama de Git que se desplegará
-    plan: starter               # Plan gratuito/Starter
-    region: oregon              # Región del servidor
-    autoDeploy: true            # Deploy automático al hacer push
+    name: tareas-app
+    env: docker
+    branch: main
+    plan: starter
+    region: oregon
+    autoDeploy: true
     dockerfilePath: ./Dockerfile
-    port: 10000                 # Puerto definido en Dockerfile
-
-    # Variables de entorno equivalentes a tu .env
+    port: 10000
     envVars:
       - key: APP_NAME
         value: TareasApp
