@@ -45,7 +45,7 @@ RUN php artisan key:generate --force \
     && php artisan config:cache \
     && php artisan route:cache
 
-# Copiar configuración Nginx
+# Copiar configuración Nginx personalizada
 COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
 
 # Exponer puerto
