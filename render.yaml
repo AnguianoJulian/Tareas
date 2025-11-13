@@ -1,21 +1,31 @@
+# render.yaml - Configuración completa de Render para Laravel con Docker
 services:
   - type: web
-    name: tareas
-    env: docker
-    branch: main
-    plan: starter
-    region: oregon
-    autoDeploy: true
+    name: tareas-app            # Nombre del servicio en Render
+    env: docker                 # Usamos Dockerfile
+    branch: main                # Rama de Git que se desplegará
+    plan: starter               # Plan gratuito/Starter
+    region: oregon              # Región del servidor
+    autoDeploy: true            # Deploy automático al hacer push
     dockerfilePath: ./Dockerfile
+    port: 10000                 # Puerto definido en Dockerfile
+
+    # Variables de entorno equivalentes a tu .env
     envVars:
+      - key: APP_NAME
+        value: TareasApp
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
-        value: false
+        value: "false"
       - key: APP_KEY
         value: base64:lQl5xuB3n+Pzp7BZYrF1k5YQ8q96mdrX1MBPG+mnHEg=
       - key: APP_URL
-        value: https://tareas-1-5g03.onrender.com
+        value: https://tareas-app.onrender.com
+      - key: LOG_CHANNEL
+        value: stack
+      - key: LOG_LEVEL
+        value: debug
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_HOST
@@ -30,7 +40,13 @@ services:
         value: mkeg3lBjxnSWXIhErX717BCW07RvZH
       - key: SESSION_DRIVER
         value: database
+      - key: SESSION_LIFETIME
+        value: "120"
       - key: CACHE_STORE
         value: database
       - key: QUEUE_CONNECTION
         value: database
+      - key: FILESYSTEM_DISK
+        value: local
+      - key: VITE_APP_NAME
+        value: TareasApp
