@@ -1,13 +1,14 @@
 services:
   - type: web
-    name: tareas-app
+    name: tareas-1
     env: docker
+    plan: free
     branch: main
-    plan: starter
-    region: oregon
+    buildCommand: ""
+    startCommand: ""
     autoDeploy: true
-    dockerfilePath: ./Dockerfile
-    port: 80
+    healthCheckPath: /
+
 
     envVars:
       - key: APP_NAME
