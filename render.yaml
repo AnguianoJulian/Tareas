@@ -1,46 +1,56 @@
 services:
   - type: web
-    name: tareas-laravel
+    name: tareas-1
     env: docker
-    plan: starter
+    plan: free
     branch: main
     region: oregon
-    autoDeploy: true
     dockerfilePath: ./Dockerfile
-    port: 80
-    healthCheckPath: /
+    autoDeploy: true
     envVars:
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
         value: false
-      - key: APP_KEY
-        generateValue: true
       - key: APP_URL
-        value: https://tareas-laravel.onrender.com
+        value: https://tareas-1-5g03.onrender.com
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_HOST
-        fromDatabase:
-          name: tareas-db
-          property: host
+        value: bcpv4sjzvhlcd5zqd0iu-postgresql.services.clever-cloud.com
       - key: DB_PORT
-        fromDatabase:
-          name: tareas-db
-          property: port
+        value: 50013
       - key: DB_DATABASE
-        fromDatabase:
-          name: tareas-db
-          property: database
+        value: bcpv4sjzvhlcd5zqd0iu
       - key: DB_USERNAME
-        fromDatabase:
-          name: tareas-db
-          property: user
+        value: u6epudwkd89b0axbmtoa
       - key: DB_PASSWORD
-        fromDatabase:
-          name: tareas-db
-          property: password
-
-databases:
-  - name: tareas-db
+        value: mkeg3lBjxnSWXIhErX717BCW07RvZH
+services:
+  - type: web
+    name: tareas-1
+    env: docker
     plan: free
+    branch: main
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_URL
+        value: https://tareas-1-5g03.onrender.com
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        value: bcpv4sjzvhlcd5zqd0iu-postgresql.services.clever-cloud.com
+      - key: DB_PORT
+        value: 50013
+      - key: DB_DATABASE
+        value: bcpv4sjzvhlcd5zqd0iu
+      - key: DB_USERNAME
+        value: u6epudwkd89b0axbmtoa
+      - key: DB_PASSWORD
+        value: mkeg3lBjxnSWXIhErX717BCW07RvZH
