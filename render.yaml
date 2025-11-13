@@ -1,51 +1,46 @@
 services:
   - type: web
-    name: tareas-1
+    name: tareas-laravel
     env: docker
-    plan: free
+    plan: starter
     branch: main
-    buildCommand: ""
-    startCommand: ""
+    region: oregon
     autoDeploy: true
+    dockerfilePath: ./Dockerfile
+    port: 80
     healthCheckPath: /
-
-
     envVars:
-      - key: APP_NAME
-        value: TareasApp
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
-        value: "false"
+        value: false
       - key: APP_KEY
-        value: base64:lQl5xuB3n+Pzp7BZYrF1k5YQ8q96mdrX1MBPG+mnHEg=
+        generateValue: true
       - key: APP_URL
-        value: https://tareas-app.onrender.com
-      - key: LOG_CHANNEL
-        value: stack
-      - key: LOG_LEVEL
-        value: debug
+        value: https://tareas-laravel.onrender.com
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_HOST
-        value: bcpv4sjzvhlcd5zqd0iu-postgresql.services.clever-cloud.com
+        fromDatabase:
+          name: tareas-db
+          property: host
       - key: DB_PORT
-        value: "50013"
+        fromDatabase:
+          name: tareas-db
+          property: port
       - key: DB_DATABASE
-        value: bcpv4sjzvhlcd5zqd0iu
+        fromDatabase:
+          name: tareas-db
+          property: database
       - key: DB_USERNAME
-        value: u6epudwkd89b0axbmtoa
+        fromDatabase:
+          name: tareas-db
+          property: user
       - key: DB_PASSWORD
-        value: mkeg3lBjxnSWXIhErX717BCW07RvZH
-      - key: SESSION_DRIVER
-        value: database
-      - key: SESSION_LIFETIME
-        value: "120"
-      - key: CACHE_STORE
-        value: database
-      - key: QUEUE_CONNECTION
-        value: database
-      - key: FILESYSTEM_DISK
-        value: local
-      - key: VITE_APP_NAME
-        value: TareasApp
+        fromDatabase:
+          name: tareas-db
+          property: password
+
+databases:
+  - name: tareas-db
+    plan: free
