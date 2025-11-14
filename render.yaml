@@ -6,12 +6,17 @@ services:
     autoDeploy: true
     dockerfilePath: ./Dockerfile
     envVars:
-      - key: APP_KEY
-        value: base64:uEj0ZfFoBnvCJxcYpZHzvprYNeHnV2mCyHPH/18D54w=
+      - key: APP_NAME
+        value: Tareas
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
         value: false
+      - key: APP_URL
+        value: https://tareas-4-tje4.onrender.com
+      - key: APP_KEY
+        value: base64:uEj0ZfFoBnvCJxcYpZHzvprYNeHnV2mCyHPH/18D54w=
+      # DB
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_HOST
@@ -24,3 +29,5 @@ services:
         value: u6epudwkd89b0axbmtoa
       - key: DB_PASSWORD
         value: mkeg3lBjxnSWXIhErX717BCW07RvZH
+      - key: DB_SSLMODE
+        value: require
