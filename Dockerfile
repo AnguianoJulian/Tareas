@@ -1,34 +1,23 @@
-FROM php:8.2-fpm
+FROM php:8.2-apache
 
 RUN apt-get update && apt-get install -y \
     git \
-    unzip \
-    curl \
-    nginx \
-    libpq-dev \
-    libzip-dev \
-    libpng-dev \
-    libonig-dev \
-    zlib1g-dev \
     zip \
-    && docker-php-ext-install pdo pdo_pgsql pgsql zip bcmath mbstring exif pcntl gd \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    unzip \
+    && docker-php-ext-install pdo pdo_mysql
 
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+RUN a2enmod rewrite
+
+COPY . /var/www/html
 
 WORKDIR /var/www/html
 
-COPY . .
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-RUN if [ ! -f .env ]; then cp .env.example .env; fi
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
-RUN composer install --no-dev --optimize-autoloader
+RUN cp .env.example .env || true
 
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
-    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
-
-COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
+RUN php artisan key:generate
 
 EXPOSE 80
-
-CMD service nginx start && php-fpm
