@@ -1,26 +1,39 @@
-FROM php:8.2-apache
+FROM php:8.2-fpm
 
-# Instalar extensiones necesarias
+# Instalar dependencias del sistema necesarias para PostgreSQL y extensiones
 RUN apt-get update && apt-get install -y \
     git \
     zip \
     unzip \
-    && docker-php-ext-install pdo pdo_mysql pdo_pgsql
+    libpq-dev \
+    postgresql-client
 
-# Habilitar mod_rewrite para Laravel
-RUN a2enmod rewrite
-
-# Copiar archivo apache para que la raíz sea /public
-COPY ./apache.conf /etc/apache2/sites-available/000-default.conf
-
-# Copiar proyecto
-COPY . /var/www/html
-
-WORKDIR /var/www/html
+# Instalar extensiones PHP requeridas
+RUN docker-php-ext-install pdo pdo_pgsql pdo_mysql
 
 # Instalar Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# Copiar archivos del proyecto
+COPY . /var/www/html
+
+# Establecer el directorio de trabajo
+WORKDIR /var/www/html
+
+# Instalar dependencias de Laravel
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
+# Asignar permisos
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+
+# Copiar configuración de Apache
+COPY apache.conf /etc/apache2/sites-available/000-default.conf
+
+# Habilitar rewrite de Apache
+RUN a2enmod rewrite
+
+# Exponer el puerto por el cual Render accede
 EXPOSE 80
+
+# Iniciar Apache
+CMD ["apache2-foreground"]
