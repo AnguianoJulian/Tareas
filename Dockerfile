@@ -1,39 +1,36 @@
-FROM php:8.2-fpm
+FROM php:8.2-apache
 
-# Instalar dependencias del sistema necesarias para PostgreSQL y extensiones
+# Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y \
     git \
     zip \
     unzip \
     libpq-dev \
-    postgresql-client
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    libzip-dev
 
-# Instalar extensiones PHP requeridas
-RUN docker-php-ext-install pdo pdo_pgsql pdo_mysql
+# Extensiones PHP necesarias
+RUN docker-php-ext-install pdo pdo_pgsql pdo_mysql mbstring zip exif pcntl bcmath gd
 
-# Instalar Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-# Copiar archivos del proyecto
-COPY . /var/www/html
-
-# Establecer el directorio de trabajo
-WORKDIR /var/www/html
-
-# Instalar dependencias de Laravel
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader
-
-# Asignar permisos
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-
-# Copiar configuración de Apache
-COPY apache.conf /etc/apache2/sites-available/000-default.conf
-
-# Habilitar rewrite de Apache
+# Habilitar mod_rewrite
 RUN a2enmod rewrite
 
-# Exponer el puerto por el cual Render accede
+# Configuración de Apache para Laravel
+COPY apache.conf /etc/apache2/sites-available/000-default.conf
+
+# Copiar proyecto
+WORKDIR /var/www/html
+COPY . .
+
+# Instalar dependencias Laravel
+RUN composer install --no-interaction --optimize-autoloader --no-dev
+
+# Permisos para Laravel
+RUN chown -R www-data:www-data storage bootstrap/cache
+
+# Exponer puerto
 EXPOSE 80
 
-# Iniciar Apache
 CMD ["apache2-foreground"]
