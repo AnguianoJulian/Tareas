@@ -1,6 +1,6 @@
 FROM php:8.2-apache
 
-# Instalar dependencias del sistema
+# Instalar dependencias
 RUN apt-get update && apt-get install -y \
     git \
     zip \
@@ -12,30 +12,37 @@ RUN apt-get update && apt-get install -y \
     libzip-dev \
     postgresql-client
 
-# Extensiones PHP necesarias
+# Extensiones PHP
 RUN docker-php-ext-install pdo pdo_pgsql pdo_mysql mbstring zip exif pcntl bcmath gd
 
-# Instalar Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
-# Habilitar mod_rewrite
+# Configuración de Apache
 RUN a2enmod rewrite
 
 # Copiar configuración de Apache
 COPY apache.conf /etc/apache2/sites-available/000-default.conf
 
 # Copiar proyecto
+COPY . /var/www/html
+
 WORKDIR /var/www/html
-COPY . .
 
-# Instalar dependencias Laravel (solo producción)
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+# Instalar Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Permisos para Laravel
+# Instalar dependencias Laravel
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader
+
+# Permisos Laravel
 RUN chown -R www-data:www-data storage bootstrap/cache
 
-# Exponer el puerto
+# Limpiar cache (¡Render lo necesita!)
+RUN php artisan config:clear || true
+RUN php artisan cache:clear || true
+
+# Crear link de storage
+RUN php artisan storage:link || true
+
+# Exponer puerto
 EXPOSE 80
 
-# Iniciar Apache
 CMD ["apache2-foreground"]
