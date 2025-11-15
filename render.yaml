@@ -3,30 +3,41 @@ services:
     name: tareas-laravel
     env: docker
     plan: free
-    autoDeploy: true
+    region: oregon
     dockerfilePath: ./Dockerfile
-
     envVars:
-      - key: APP_KEY
-        value: base64:uEj0ZfFoBnvCJxcYpZHzvprYNeHnV2mCyHPH/18D54w=
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
         value: false
-      - key: APP_URL
-        value: https://tareas-4-tje4.onrender.com
-
+      - key: APP_KEY
+        generateValue: true
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_HOST
-        value: bcpv4sjzvhlcd5zqd0iu-postgresql.services.clever-cloud.com
+        fromDatabase:
+          name: tareas-db
+          property: host
       - key: DB_PORT
-        value: "50013"
+        value: 5432
       - key: DB_DATABASE
-        value: bcpv4sjzvhlcd5zqd0iu
+        fromDatabase:
+          name: tareas-db
+          property: database
       - key: DB_USERNAME
-        value: u6epudwkd89b0axbmtoa
+        fromDatabase:
+          name: tareas-db
+          property: user
       - key: DB_PASSWORD
-        value: mkeg3lBjxnSWXIhErX717BCW07RvZH
-      - key: DB_SSLMODE
-        value: require
+        fromDatabase:
+          name: tareas-db
+          property: password
+      - key: SESSION_DRIVER
+        value: database
+      - key: SESSION_LIFETIME
+        value: 120
+
+databases:
+  - name: tareas-db
+    plan: free
+    region: oregon

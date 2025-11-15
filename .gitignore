@@ -9,14 +9,17 @@
 Homestead.yaml
 Homestead.json
 
-# IDEs y sistemas operativos
+# IDE & OS
 .idea
 .vscode
 .DS_Store
 Thumbs.db
 
-# Vite/Tailwind
+# Logs
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
 pnpm-debug.log*
+
+# Vite
+public/hot
+public/build
