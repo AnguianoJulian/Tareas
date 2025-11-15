@@ -1,48 +1,45 @@
 FROM php:8.2-apache
 
-# Instalar dependencias del sistema
+# Extensiones necesarias
 RUN apt-get update && apt-get install -y \
     git \
     zip \
     unzip \
     libpq-dev \
+    libzip-dev \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
-    libzip-dev \
     postgresql-client
 
-# Extensiones PHP necesarias para Laravel
-RUN docker-php-ext-install pdo pdo_pgsql pdo_mysql mbstring zip exif pcntl bcmath gd
+RUN docker-php-ext-install pdo pdo_pgsql mbstring zip gd
 
-# Habilitar rewrite para Laravel
+# Habilitar rewrite
 RUN a2enmod rewrite
 
 # Copiar configuración de Apache
 COPY apache.conf /etc/apache2/sites-available/000-default.conf
 
-# Copiar proyecto Laravel
+# Copiar proyecto
 COPY . /var/www/html
-
 WORKDIR /var/www/html
 
-# Instalar Composer
+# Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Instalar dependencias PHP
+# Instalar vendors limpio
+RUN composer clear-cache
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
-# Permisos para Laravel
-RUN chown -R www-data:www-data storage bootstrap/cache
+# Permisos
+RUN chown -R www-data:www-data storage bootstrap/cache vendor
 
-# Limpiar caches (Render lo requiere)
+# Limpiar cache Laravel
 RUN php artisan config:clear || true
 RUN php artisan cache:clear || true
-RUN php artisan route:clear || true
-RUN php artisan view:clear || true
 
-# Crear symlink del storage
-RUN php artisan storage:link || true
+# Migraciones automáticas
+RUN php artisan migrate --force || true
 
 EXPOSE 80
 
