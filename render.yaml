@@ -5,18 +5,17 @@ services:
     plan: free
     autoDeploy: true
     dockerfilePath: ./Dockerfile
+
     envVars:
-      - key: APP_NAME
-        value: Tareas
+      - key: APP_KEY
+        value: base64:uEj0ZfFoBnvCJxcYpZHzvprYNeHnV2mCyHPH/18D54w=
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
         value: false
       - key: APP_URL
         value: https://tareas-4-tje4.onrender.com
-      - key: APP_KEY
-        value: base64:uEj0ZfFoBnvCJxcYpZHzvprYNeHnV2mCyHPH/18D54w=
-      # DB
+
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_HOST

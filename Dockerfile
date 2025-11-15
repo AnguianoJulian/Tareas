@@ -1,45 +1,33 @@
 FROM php:8.2-apache
 
-# Extensiones necesarias
-RUN apt-get update && apt-get install -y \
-    git \
-    zip \
-    unzip \
-    libpq-dev \
-    libzip-dev \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    postgresql-client
+# Habilitar módulos
+RUN docker-php-ext-install pdo pdo_pgsql
 
-RUN docker-php-ext-install pdo pdo_pgsql mbstring zip gd
-
-# Habilitar rewrite
+# Habilitar Apache mod_rewrite
 RUN a2enmod rewrite
 
-# Copiar configuración de Apache
-COPY apache.conf /etc/apache2/sites-available/000-default.conf
+# Instalar Node.js 18
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs git unzip
 
-# Copiar proyecto
-COPY . /var/www/html
+# Copiar archivos del proyecto
+COPY . /var/www/html/
+
+# Ir al directorio
 WORKDIR /var/www/html
 
-# Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# Instalar dependencias PHP
+RUN php composer.phar install --no-dev --optimize-autoloader || true
+RUN composer install --no-dev --optimize-autoloader
 
-# Instalar vendors limpio
-RUN composer clear-cache
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader
+# Instalar dependencias NPM y build
+RUN npm install && npm run build
 
 # Permisos
-RUN chown -R www-data:www-data storage bootstrap/cache vendor
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Limpiar cache Laravel
-RUN php artisan config:clear || true
-RUN php artisan cache:clear || true
-
-# Migraciones automáticas
-RUN php artisan migrate --force || true
+# Configurar DocumentRoot
+RUN sed -i 's#/var/www/html#/var/www/html/public#g' /etc/apache2/sites-available/000-default.conf
 
 EXPOSE 80
 

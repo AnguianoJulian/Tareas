@@ -16,7 +16,6 @@ Homestead.json
 Thumbs.db
 
 # Vite/Tailwind
-/public/build
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
