@@ -1,6 +1,6 @@
 FROM php:8.2-apache
 
-# Instalar dependencias necesarias
+# Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y \
     git curl zip unzip libpq-dev \
     && docker-php-ext-install pdo pdo_pgsql
@@ -14,20 +14,19 @@ RUN a2enmod rewrite
 
 WORKDIR /var/www/html
 
-# Copiar composer para cache inteligente
-COPY composer.json composer.lock ./
+# Copiar TODOS los archivos del proyecto
+COPY . .
+
+# Instalar Composer
+RUN curl -sS https://getcomposer.org/installer | php
 
 # Instalar dependencias PHP
-RUN curl -sS https://getcomposer.org/installer | php \
-    && php composer.phar install --no-dev --optimize-autoloader
-
-# Copiar todo el proyecto
-COPY . .
+RUN php composer.phar install --no-dev --optimize-autoloader
 
 # Instalar dependencias NPM y compilar Vite
 RUN npm install && npm run build
 
-# Permisos
+# Ajustar permisos
 RUN chown -R www-data:www-data storage bootstrap/cache
 
 # Configurar Apache para servir /public
